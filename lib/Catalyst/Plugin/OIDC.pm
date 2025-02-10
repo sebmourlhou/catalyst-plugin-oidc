@@ -30,6 +30,9 @@ Catalyst::Plugin::OIDC - OIDC protocol integration for Catalyst
 This plugin makes it easy to integrate the OpenID Connect protocol
 into a Catalyst application.
 
+It essentially uses the L<OIDC-Client|https://metacpan.org/dist/OIDC-Client>
+distribution.
+
 =cut
 
 __PACKAGE__->mk_classdata('_oidc_config');
