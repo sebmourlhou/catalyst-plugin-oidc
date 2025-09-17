@@ -11,7 +11,6 @@ get('/wellknown' => sub {
     authorization_endpoint => '/authorize',
     end_session_endpoint   => '/logout',
     token_endpoint         => '/token',
-    userinfo_endpoint      => '/userinfo',
     jwks_uri               => '/jwks',
   );
   $c->render(json => {map { $_ => $url{$_} } keys %url});
@@ -39,34 +38,6 @@ post('/token' => sub {
                     status => 401);
        }
      });
-
-get('/userinfo' => sub {
-      my $c = shift;
-
-      my $authorization = $c->req->headers->authorization;
-
-      if ($authorization eq 'Bearer Doe') {
-        $c->render(json => {
-          sub       => 'DOEJ',
-          firstName => 'John',
-          lastName  => 'Doe',
-          roles     => [qw/app.role1 app.role2/],
-        });
-      }
-      elsif ($authorization eq 'Bearer Smith') {
-        $c->render(json => {
-          sub       => 'SMITHL',
-          firstName => 'Liam',
-          lastName  => 'Smith',
-          roles     => [qw/app.role3/],
-        });
-      }
-      else {
-        $c->render(json => {error             => 'SearchError',
-                            error_description => 'User not found'},
-                   status => 404);
-      }
-    });
 
 app->start;
 

@@ -8,11 +8,11 @@ use HTTP::Request::Common;
 use HTTP::Cookies;
 
 use FindBin qw($Bin);
-use lib "$Bin/lib/MyCatalystApp/lib";
+use lib "$Bin/auth-code-flow-IT/MyCatalystApp/lib";
 
 local $ENV{MOJO_LOG_LEVEL} = 'error';
 
-my $provider_app = require "$Bin/lib/MyProviderApp/app.pl";
+my $provider_app = require "$Bin/auth-code-flow-IT/MyProviderApp/app.pl";
 
 my $mock_oidc_client = Test::MockModule->new('OIDC::Client');
 $mock_oidc_client->redefine('kid_keys' => sub { {} });

@@ -7,27 +7,42 @@ use Test::MockModule;
 use HTTP::Request::Common;
 
 use FindBin qw($Bin);
-use lib "$Bin/lib/MyCatalystApp/lib";
+use lib "$Bin/resource-server-IT/MyCatalystApp/lib";
 
 local $ENV{MOJO_LOG_LEVEL} = 'error';
 
-my $provider_app = require "$Bin/lib/MyProviderApp/app.pl";
+my $provider_app = require "$Bin/resource-server-IT/MyProviderApp/app.pl";
 
 my $mock_oidc_client = Test::MockModule->new('OIDC::Client');
-$mock_oidc_client->redefine('kid_keys'    => sub { {} });
-$mock_oidc_client->redefine('user_agent'  => $provider_app->ua);
+$mock_oidc_client->redefine('user_agent' => $provider_app->ua);
 $mock_oidc_client->redefine('decode_jwt' => sub {
-  {
-    'iss'   => 'my_issuer',
-    'exp'   => 12345,
-    'aud'   => 'my_id',
-    'sub'   => 'my_subject',
-    'nonce' => 'fake_uuid',
+  my %params = @_;
+  if ($params{token} eq 'Doe') {
+    return {
+      iss       => 'my_issuer',
+      exp       => 12345,
+      aud       => 'my_id',
+      sub       => 'DOEJ',
+      firstName => 'John',
+      lastName  => 'Doe',
+      roles     => [qw/app.role1 app.role2/],
+    }
+  }
+  elsif ($params{token} eq 'Smith') {
+    return {
+      iss       => 'my_issuer',
+      exp       => 12345,
+      aud       => 'my_id',
+      sub       => 'SMITHL',
+      firstName => 'Liam',
+      lastName  => 'Smith',
+      roles     => [qw/app.role3/],
+    }
+  }
+  else {
+    die 'invalid token';
   }
 });
-
-my $mock_access_token = Test::MockModule->new('OIDC::Client::AccessToken');
-$mock_access_token->redefine('has_expired' => sub { 0 });
 
 require Catalyst::Test;
 Catalyst::Test->import('MyCatalystApp');

@@ -39,8 +39,8 @@ sub my_resource :Path('my-resource') :Args(0) {
   my ( $self, $c ) = @_;
 
   my $user = try {
-    $c->oidc->verify_token();
-    return $c->oidc->build_user_from_userinfo();
+    my $access_token = $c->oidc->verify_token();
+    return $c->oidc->build_user_from_claims($access_token->claims);
   }
   catch {
     $c->log->warn("Token/User validation : $_");
