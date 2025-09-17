@@ -11,7 +11,6 @@ get('/wellknown' => sub {
     authorization_endpoint => '/authorize',
     end_session_endpoint   => '/logout',
     token_endpoint         => '/token',
-    userinfo_endpoint      => '/userinfo',
     jwks_uri               => '/jwks',
   );
   $c->render(json => {map { $_ => $url{$_} } keys %url});
@@ -19,10 +18,9 @@ get('/wellknown' => sub {
 # get '/authorize' in MyCatalystApp/Controller/Root.pm (ugly but necessary)
 post('/token' => sub {
        my $c = shift;
-       my $grant_type    = $c->param('grant_type');
-       my $client_id     = $c->param('client_id');
-       my $client_secret = $c->param('client_secret');
-       my $code          = $c->param('code');
+       my ($client_id, $client_secret) = split(':', $c->req->url->to_abs->userinfo);
+       my $grant_type = $c->param('grant_type');
+       my $code       = $c->param('code');
        if ($grant_type eq 'authorization_code'
            && $client_id eq 'my_id' && $client_secret eq 'my_secret'
            && $code eq 'abc') {
@@ -39,34 +37,6 @@ post('/token' => sub {
                     status => 401);
        }
      });
-
-get('/userinfo' => sub {
-      my $c = shift;
-
-      my $authorization = $c->req->headers->authorization;
-
-      if ($authorization eq 'Bearer Doe') {
-        $c->render(json => {
-          sub       => 'DOEJ',
-          firstName => 'John',
-          lastName  => 'Doe',
-          roles     => [qw/app.role1 app.role2/],
-        });
-      }
-      elsif ($authorization eq 'Bearer Smith') {
-        $c->render(json => {
-          sub       => 'SMITHL',
-          firstName => 'Liam',
-          lastName  => 'Smith',
-          roles     => [qw/app.role3/],
-        });
-      }
-      else {
-        $c->render(json => {error             => 'SearchError',
-                            error_description => 'User not found'},
-                   status => 404);
-      }
-    });
 
 app->start;
 
